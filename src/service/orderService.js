@@ -10,91 +10,42 @@ const orderService = {
 		return orderModel.find({ "customer.customerId": data });
 	},
 
-	async dataGetUserOderId(userId, orderId) {
-		// const inputUserId = `ObjectId('${userId}')`;
-		// const OrderId = new mongoose.Types.ObjectId(orderId);
-		const outAggregate = orderModel
-			.find({
-				"customer.customerId": userId,
-				_id: orderId,
-			})
-			.populate("customer.customerId");
-		// const outAggregate = await orderModel.aggregate([
-		// 	{
-		// 		$match: {
-		// 			"customer.customerId": new mongoose.Types.ObjectId(userId),
-		// 			_id: new mongoose.Types.ObjectId(orderId),
-		// 			// "customer.customerId": userId,
-		// 			// _id: orderId,
-		// 		},
-		// 	},
-		// 	{
-		// 		$lookup: {
-		// 			from: "users",
-		// 			localField: "customer.customerId",
-		// 			foreignField: "_id",
-		// 			as: "customer",
-		// 		},
-		// 		// $project: {
-		// 		// 	address: 1,
-		// 		// },
-		// 	},
-		// ]);
-		// ------------------------
-		// .aggregate([
-		// 	{
-		// 		$match: {
-		// 			"customer.customerId": ObjectId('668b6edc85daeb3a4220771a'),
-		// 			_id: ObjectId('6690aba06e27230744df5fbd'),
-		// 		},
-		// 	},
-		// 	{
-		// 		$lookup: {
-		// 			from: "users",
-		// 			localField: "customer.customerId",
-		// 			foreignField: "_id",
-		// 			as: "customer.customerDetails",
-		// 		}},{
-		//     $project: {
-		//         orderDate: 1,
-		//         totalPrice: 1,
-		//         status: 1,
-		// 						createOn:1,
-		//         "customer.customerId": 1,
-		// 						"customer.customerDetails.address":1,
+  async dataGetUserOrderId(orderId) {
+    const order = await OrderModel.aggregate([
+      { $match: { _id: mongoose.Types.ObjectId(orderId) } },
+      {
+          $lookup: {
+              from: 'users',
+              localField: 'customer.customerId',
+              foreignField: '_id',
+              as: 'customer'
+          }
+      },
+      { $unwind: '$user' },
+      { $project: { 
+          'order.customer': { 
+              customerId: '$customer._id',
+              addressIndex: '$customer.addressIndex',
+              address: '$customer.address[3]' //$customer.address[3]
+          },
+          orderDate: 1,
+          _id: 1,
+          orderDetail: 1,
+          totalPrice: 1,
+          status: 1,
+          createOn: 1 
+      } }
+  ]);
 
-		//     }
-		// 	},])
+  if (!order || order.length === 0) {
+      throw new Error("Order not found");
+  }
 
-		// orders.aggregate([
-		// 	{
-		// 		$match: {
-		// 			"customer.customerId": ObjectId("668b6edc85daeb3a4220771a"),
-		// 			_id: ObjectId("6690aba06e27230744df5fbd"),
-		// 		},
-		// 	},
-		// 	{
-		// 		$lookup: {
-		// 			from: "users",
-		// 			localField: "customer.customerId",
-		// 			foreignField: "_id",
-		// 			as: "customer.customerDetails",
-		// 		},
-		// 	},
-		// 	{
-		// 		$project: {
-		// 			orderDate: 1,
-		// 			totalPrice: 1,
-		// 			status: 1,
-		// 			createOn: 1,
-		// 			"customer.customerId": 1,
-		// 			"customer.customerDetails.address": 1,
-		// 		},
-		// 	},
-		// ]);
-		return outAggregate;
-		// .populate("customer");
-	},
+  console.log(order)
+
+  return order[0];
+
+},
 
 	async dataCreateOrderData(data) {
 		// const order = new orderModel(data);

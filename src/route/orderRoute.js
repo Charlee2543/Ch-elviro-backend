@@ -1,9 +1,9 @@
 import express from "express";
 import {
-	getAllOrder,
-	PostCreateOrder,
-	getUserId,
-	getUserOderId,
+    getAllOrder,
+    postCreateOrder,
+    getUserId,
+    getUserOrderId,
 } from "../controller/orderController.js";
 
 const router = express.Router();
@@ -13,7 +13,7 @@ router.get("/", getAllOrder);
 // get All Order in user
 router.get("/:userId", getUserId);
 // get one Order in user
-router.get("/:userId/:orderId", getUserOderId);
+router.get("/:userId/:orderId", getUserOrderId); // may be delete :userId
 // post create order
-router.post("/", PostCreateOrder);
+router.post("/", postCreateOrder);
 export default router;

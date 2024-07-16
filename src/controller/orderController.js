@@ -30,21 +30,23 @@ export const getUserId = async (req, res, next) => {
 	}
 };
 
-export const getUserOderId = async (req, res, next) => {
-	try {
-		const { userId, orderId } = req.params;
-		// const inputUserId = `ObjectId('${userId}')`;
-		// console.log("inputUserId  : " + inputUserId);
-		// console.log("userId : " + userId);
-		// console.log("---------------");
-		// console.log("orderId :" + orderId);
-		const user = await orderService.dataGetUserOderId(userId, orderId);
-		return res
-			.status(200)
-			.json({ message: "Get One order in user", data: user });
-	} catch (error) {
-		next(error);
-	}
+export const getUserOrderId = async (req, res, next) => {
+    try {
+        const orderId = req.params;
+
+        const order = await orderService.dataGetUserOrderId(orderId);
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        return res.status(200).json({
+            message: "Get One order in user",
+            data: { order }
+        });
+    } catch (error) {
+        next(error);
+    }
 };
 
 export const PostCreateOrder = async (req, res, next) => {
